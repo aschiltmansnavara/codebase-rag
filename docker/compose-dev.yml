@@ -1,0 +1,109 @@
+services:
+  qdrant:
+    container_name: codebase-rag-qdrant
+    image: qdrant/qdrant:v1.12.6
+    volumes:
+      - codebase_rag_qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - codebase_rag_network
+
+  langfuse-db:
+    container_name: codebase-rag-langfuse-db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+      POSTGRES_DB: langfuse
+    volumes:
+      - codebase_rag_langfuse_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - codebase_rag_network
+
+  langfuse:
+    container_name: codebase-rag-langfuse
+    image: langfuse/langfuse:2
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      NEXTAUTH_SECRET: codebase-rag-secret
+      NEXTAUTH_URL: http://localhost:3000
+      SALT: codebase-rag-salt
+    ports:
+      - "3000:3000"
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    networks:
+      - codebase_rag_network
+
+  ollama:
+    container_name: codebase-rag-ollama
+    image: ollama/ollama:latest
+    volumes:
+      - codebase_rag_ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - codebase_rag_network
+
+  app:
+    container_name: codebase-rag-app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    environment:
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: "6333"
+      OLLAMA_BASE_URL: http://ollama:11434
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-sam860/LFM2:350m}
+      DEFAULT_REPO_URL: ${DEFAULT_REPO_URL:-}
+      LANGFUSE_ENABLED: ${LANGFUSE_ENABLED:-false}
+      LANGFUSE_HOST: http://langfuse:3000
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+    ports:
+      - "8501:8501"
+    volumes:
+      - codebase_rag_app_data:/app/data
+      - codebase_rag_app_cache:/app/cache
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    networks:
+      - codebase_rag_network
+
+networks:
+  codebase_rag_network:
+    name: codebase_rag_network
+
+volumes:
+  codebase_rag_qdrant_data:
+    name: codebase_rag_qdrant_data
+  codebase_rag_langfuse_db:
+    name: codebase_rag_langfuse_db
+  codebase_rag_ollama_data:
+    name: codebase_rag_ollama_data
+  codebase_rag_app_data:
+    name: codebase_rag_app_data
+  codebase_rag_app_cache:
+    name: codebase_rag_app_cache

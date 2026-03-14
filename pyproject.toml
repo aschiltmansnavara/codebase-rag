@@ -1,0 +1,89 @@
+[project]
+name = "codebase-rag"
+version = "0.1.0"
+description = "LLM-RAG application for exploring and understanding codebases"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Alex Schiltmans" },
+]
+dependencies = [
+    "langchain>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langchain-ollama>=0.3.0",
+    "langchain-text-splitters>=0.3.0",
+    "streamlit>=1.28.0,<2",
+    "qdrant-client>=1.7.0,<2",
+    "gitpython>=3.1.40,<4",
+    "sentence-transformers>=2.2.2",
+    "rank-bm25>=0.2.2,<1",
+    "python-dotenv>=1.0.0,<2",
+    "requests>=2.28.0",
+    "langfuse>=2.0.0,<3",
+    "ragas>=0.4.3,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.19",
+    "ruff>=0.15",
+    "pytest>=7.4.3,<9",
+    "pytest-cov>=4.1.0,<6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["data/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "N", "UP", "ANN", "S", "BLE", "FBT", "A", "C4", "ICN", "PIE", "T20", "PT", "RET", "SIM"]
+ignore = [
+    "ANN401",   # Dynamically typed expressions (typing.Any) disallowed — unavoidable for **kwargs and duck-typed APIs
+    "BLE001",   # Blind exception catches — intentional at infrastructure boundaries (Qdrant, git, subprocess)
+    "FBT001",   # Boolean-typed positional argument — these are keyword-only defaults
+    "FBT002",   # Boolean default positional argument — these are keyword-only defaults
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "S101",   # assert is expected in tests
+    "ANN",    # type annotations not required
+    "S108",   # /tmp paths in mock configs are not a security risk
+    "S301",   # pickle in test fixtures is safe
+    "S311",   # pseudo-random is fine for test data generation
+    "PT017",  # @patch params misidentified as fixtures
+    "PT019",  # @patch params misidentified as fixtures
+    "FBT003", # boolean positional in patch.object calls
+]
+"evals/**" = [
+    "T201",   # print is expected in CLI evaluation scripts
+    "ANN",    # type annotations not required
+]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.coverage.run]
+relative_files = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"

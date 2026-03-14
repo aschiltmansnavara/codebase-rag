@@ -1,0 +1,132 @@
+[
+  {
+    "question": "What types of calculations does power-grid-model support?",
+    "expected_answer": "Power-grid-model supports three types of calculations: Power Flow, State Estimation, and Short Circuit analysis.",
+    "keywords": ["power flow", "state estimation", "short circuit"],
+    "sources": ["README.md", "enum.py"],
+    "difficulty": "easy",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What C++ standard does power-grid-model require?",
+    "expected_answer": "Power-grid-model requires C++23 (PGM_CXX_STANDARD 23), as specified in the CMakeLists.txt.",
+    "keywords": ["C++23", "23"],
+    "sources": ["CMakeLists.txt"],
+    "difficulty": "easy",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What are the third-party C++ dependencies of power-grid-model?",
+    "expected_answer": "The C++ dependencies are Boost, Eigen3, nlohmann_json, and msgpack-cxx. On non-Windows platforms, Threads is also required.",
+    "keywords": ["Boost", "Eigen3", "nlohmann_json", "msgpack"],
+    "sources": ["CMakeLists.txt"],
+    "difficulty": "easy",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What is the component type hierarchy in power-grid-model?",
+    "expected_answer": "The base types are node, branch, branch3, appliance, and sensor. Branch subtypes include line, link, generic_branch, and transformer. Branch3 has three_winding_transformer. Appliance includes source, shunt, and generic_load_gen (sym_load, asym_load, sym_gen, asym_gen). Sensor includes voltage sensors and power sensors.",
+    "keywords": ["node", "branch", "appliance", "sensor", "transformer", "line", "source"],
+    "sources": ["data-model.md", "all_components.hpp"],
+    "difficulty": "medium",
+    "category": "cross_file_reasoning"
+  },
+  {
+    "question": "What calculation methods are available and what are their enum values?",
+    "expected_answer": "The CalculationMethod enum has: linear (0), newton_raphson (1), iterative_linear (2), iterative_current (3), linear_current (4), and iec60909 (5).",
+    "keywords": ["newton_raphson", "linear", "iterative", "iec60909", "CalculationMethod"],
+    "sources": ["enum.py"],
+    "difficulty": "medium",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How do you create input data for a power-grid-model calculation?",
+    "expected_answer": "Use initialize_array to create numpy structured arrays for each component type, e.g. initialize_array('input', 'node', N). Then pass a dict of these arrays to the PowerGridModel constructor.",
+    "keywords": ["initialize_array", "numpy", "PowerGridModel", "input"],
+    "sources": ["test_power_grid_model.py"],
+    "difficulty": "medium",
+    "category": "how_does_it_work"
+  },
+  {
+    "question": "What error is raised when a state estimation system is not observable?",
+    "expected_answer": "A NotObservableError is raised when the system does not have enough measurements to be observable. The system requires at least 2*n_nodes - 1 measurements and at least one voltage sensor.",
+    "keywords": ["NotObservableError", "observable", "measurement", "voltage sensor"],
+    "sources": ["errors.py", "observability.hpp"],
+    "difficulty": "medium",
+    "category": "cross_file_reasoning"
+  },
+  {
+    "question": "What is the base power constant used in power-grid-model per-unit calculations?",
+    "expected_answer": "The three-phase base power (base_power_3p) is 1e6 (1 MVA). The single-phase base power (base_power_1p) is base_power_3p / 3.0.",
+    "keywords": ["base_power", "1e6", "MVA"],
+    "sources": ["common.hpp"],
+    "difficulty": "hard",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What winding types are supported for transformers?",
+    "expected_answer": "The WindingType enum supports: wye (0), wye_n (1), delta (2), zigzag (3), and zigzag_n (4).",
+    "keywords": ["wye", "delta", "zigzag", "WindingType"],
+    "sources": ["enum.py"],
+    "difficulty": "medium",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What fault types can be modeled for short circuit analysis?",
+    "expected_answer": "The FaultType enum supports: three_phase (0), single_phase_to_ground (1), two_phase (2), and two_phase_to_ground (3).",
+    "keywords": ["three_phase", "single_phase_to_ground", "two_phase", "FaultType"],
+    "sources": ["enum.py", "fault.hpp"],
+    "difficulty": "medium",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How does the power-grid-model core architecture work from input to output?",
+    "expected_answer": "The data flows through: Input data → Component construction → Topology construction using Boost Graph Library → Y_bus construction → Solver construction → Solving → Grid extraction → Component extraction → Output. The central engine is the MainModel class.",
+    "keywords": ["MainModel", "topology", "Y_bus", "solver", "Boost"],
+    "sources": ["core-design.md"],
+    "difficulty": "hard",
+    "category": "how_does_it_work"
+  },
+  {
+    "question": "What validation error classes exist for input data validation?",
+    "expected_answer": "Validation errors inherit from ValidationError (with component, field, ids attributes). Concrete subclasses include NotIdenticalError, NotUniqueError, MultiComponentNotUniqueError, InvalidValueError, InvalidEnumValueError, SameValueError, NotBooleanError, MissingValueError, IdNotInDatasetError, InvalidIdError, and TwoValuesZeroError.",
+    "keywords": ["ValidationError", "InvalidValueError", "MissingValueError", "NotUniqueError"],
+    "sources": ["errors.py", "validation"],
+    "difficulty": "hard",
+    "category": "cross_file_reasoning"
+  },
+  {
+    "question": "What license is power-grid-model released under?",
+    "expected_answer": "Power-grid-model is licensed under the Mozilla Public License, version 2.0 (MPL-2.0).",
+    "keywords": ["MPL-2.0", "Mozilla"],
+    "sources": ["README.md", "LICENSE"],
+    "difficulty": "easy",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What are the tap changing strategies available for transformer regulation?",
+    "expected_answer": "The TapChangingStrategy enum has: disabled (0), any_valid_tap (1), min_voltage_tap (2), max_voltage_tap (3), and fast_any_tap (4).",
+    "keywords": ["TapChangingStrategy", "disabled", "min_voltage_tap", "max_voltage_tap"],
+    "sources": ["enum.py"],
+    "difficulty": "medium",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What happens when you try to connect a line between nodes with different rated voltages?",
+    "expected_answer": "A ConflictVoltage error is raised. Lines require from and to nodes to have the same rated voltage (u_rated).",
+    "keywords": ["ConflictVoltage", "u_rated", "voltage"],
+    "sources": ["line.hpp"],
+    "difficulty": "hard",
+    "category": "cross_file_reasoning"
+  },
+  {
+    "question": "What is the minimum Python version required and what build system does the Python package use?",
+    "expected_answer": "Power-grid-model requires Python >= 3.12 and uses scikit-build-core as the build system.",
+    "keywords": ["3.12", "scikit-build-core", "Python"],
+    "sources": ["pyproject.toml"],
+    "difficulty": "easy",
+    "category": "factual_lookup",
+    "expected_failure": true,
+    "failure_reason": "The RAG system may confuse the power-grid-model pyproject.toml with the codebase-rag pyproject.toml"
+  }
+]
